@@ -12,7 +12,13 @@ case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: Colorin
   private var resultingState: Option[ColoringState[V, VC]] = None
 
   def trySolve() = {
-    resultingState = findColoring(initialState)
+    findColoring(initialState) map { finalState =>
+      if (!finalState.isConsistent) {
+        //A bit of sanity checking
+        throw new RuntimeException("Internal error: graph coloring algorithm returned inconsistent result")
+      }
+      resultingState = Some(finalState)
+    }
   }
 
   def getSolution: Option[GraphColoring[V, VC]] = resultingState flatMap (_.getColoring)
@@ -21,27 +27,32 @@ case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: Colorin
    * Implements backtracking on vertex colors.
    *
    * Selects a vertex with a minimal amount of suitable colors, paints it to the first of them and tries to solve the
-   * reduced problem. If no coloring found, tries another suitable color and so on, until solution is found.
+   * reduced problem. If no coloring found, tries another suitable color and so on, until solution is found or
+   * all colors tried.
    *
    * @param state - state with current partial coloring and suitable colors for vertices
    * @return any state with full and consistent coloring or None, if it's not exists
    */
   private def findColoring(state: ColoringState[V, VC]): Option[ColoringState[V, VC]] = {
-    if (state.isComplete) {
-      return Some(state)
-    }
+    //Filtering out non-colored vertices
+    state.vertices.filter(_.color.isEmpty) match {
+      case Nil                =>
+        //This is final state, all vertices are colored
+        Some(state)
 
-    for {
-      nonColoredVertex  <- state.vertices.filter(_.color.isEmpty)
-      color             <- nonColoredVertex.suitableColors
-      updatedState      = state.paintVertex(nonColoredVertex.vertex, color)
-      if updatedState.isConsistent
-      finalState        <- findColoring(updatedState)
-    } {
-      return Some(finalState)
+      case nonColoredVertices =>
+        //Searching for the not colored vertex with minimal suitable colors
+        val vertexToPaint = nonColoredVertices.minBy(_.suitableColors.size)
+        for {
+          color         <- vertexToPaint.suitableColors
+          updatedState  = state.paintVertex(vertexToPaint.vertex, color)
+          finalState    <- findColoring(updatedState)
+        } yield {
+          //Returning first found final state
+          return Some(finalState)
+        }
+        None
     }
-
-    None
   }
 
 }

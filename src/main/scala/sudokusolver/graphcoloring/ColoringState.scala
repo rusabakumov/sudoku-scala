@@ -1,12 +1,17 @@
 package sudokusolver.graphcoloring
 
+import sudokusolver.utils.Logging
+
 /**
  * Represents state of graph coloring problem (graph structure and partial coloring)
  * Contains methods for checking consistency of the state and transition methods to build new states (painting one vertex)
  *
+ * Transition method (paintVertex) maintains state consistency (suitable colors are safe, vertex can be painted to any
+ * suitable color without breaking state consistency)
+ *
  * @param vertices - list of states for all vertices in graph
  */
-case class ColoringState[V <: Vertex, VC <: VertexColor](vertices: List[VertexState[V, VC]]) {
+case class ColoringState[V <: Vertex, VC <: VertexColor](vertices: List[VertexState[V, VC]]) extends Logging {
   /**
    * Checks that current partial coloring is correct at this state:
    * all uncolored vertices has at least one suitable color
@@ -14,20 +19,31 @@ case class ColoringState[V <: Vertex, VC <: VertexColor](vertices: List[VertexSt
   def isConsistent: Boolean = {
     vertices forall {
       //If vertex is colored - no neighbors colored with the same color
-      case VertexState(_, Some(color), _, neighbors) => neighbors forall { case vertexIndex =>
-        vertices.find(_.vertex == vertexIndex).forall(_.color != Some(color))
+      case VertexState(vertex, Some(color), _, neighbors) => neighbors forall {
+        case neighborVertex => vertices.find(_.vertex == neighborVertex).forall { neighborVertexState =>
+          val colorsNotSame = neighborVertexState.color != Some(color)
+
+          if (!colorsNotSame) {
+            logger.debug(s"Connected vertices $vertex and $neighborVertex have the same color $color!")
+          }
+
+          colorsNotSame
+        }
       }
       case VertexState(_, None, suitableColors, _) => suitableColors.nonEmpty
     }
   }
 
   /**
-   * Checks that this state is final - all vertices colored in correct way
+   * Checks that this state is final - all vertices colored
    */
-  def isComplete: Boolean = vertices.forall(_.color.isDefined) && isConsistent
+  def isComplete: Boolean = vertices.forall(_.color.isDefined)
 
   /**
    * Updates state by painting given vertex to given color and returns updated state
+   *
+   * Also updates list of suitable colors for neighbor vertices - each color in this list assumed to be "safe"
+   * (vertex can be painted to it without breaking consistency)
    */
   def paintVertex(vertex: V, color: VC): ColoringState[V, VC] = vertices.find(_.vertex == vertex) match {
     case Some(vertexState) =>
@@ -39,10 +55,10 @@ case class ColoringState[V <: Vertex, VC <: VertexColor](vertices: List[VertexSt
 
       val updatedVertices = vertices map {
         //Newly colored vertex
-        case VertexState(idx, _, _, _) if idx == vertex   => updatedVertexState
-        case vs @ VertexState(idx, _, suitableColors, _)
-          if vertexState.adjacentVertices.contains(idx)   => vs.copy(suitableColors = suitableColors - color)
-        case vs : VertexState[V, VC]                      => vs
+        case VertexState(v, _, _, _) if v == vertex         => updatedVertexState
+        case vs @ VertexState(v, _, suitableColors, _)
+          if vertexState.adjacentVertices.contains(v)       => vs.copy(suitableColors = suitableColors - color)
+        case vs : VertexState[V, VC]                        => vs
       }
       copy(vertices = updatedVertices)
 
