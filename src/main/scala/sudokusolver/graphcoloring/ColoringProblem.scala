@@ -21,7 +21,7 @@ case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: Colorin
     }
   }
 
-  def getSolution: Option[GraphColoring[V, VC]] = resultingState flatMap (_.getColoring)
+  def solution: Option[GraphColoring[V, VC]] = resultingState flatMap (_.getColoring)
 
   /**
    * Implements backtracking on vertex colors.
@@ -43,11 +43,11 @@ case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: Colorin
       case nonColoredVertices =>
         //Searching for the not colored vertex with minimal suitable colors
         val vertexToPaint = nonColoredVertices.minBy(_.suitableColors.size)
-        for {
-          color         <- vertexToPaint.suitableColors
-          updatedState  = state.paintVertex(vertexToPaint.vertex, color)
+        for (
+          color         <- vertexToPaint.suitableColors;
+          updatedState  = state.paintVertex(vertexToPaint.vertex, color);
           finalState    <- findColoring(updatedState)
-        } yield {
+        ) {
           //Returning first found final state
           return Some(finalState)
         }

@@ -54,7 +54,7 @@ object Tester extends Logging {
         val secondsPassed = duration * secondsInNanos
         val formattedSeconds = "%.3f".format(secondsPassed)
 
-        sudokuGame.getSolution match {
+        sudokuGame.solution match {
           case Some(resultingGrid)  =>
             logger.info(s"Grid #$index solved in $formattedSeconds seconds")
 

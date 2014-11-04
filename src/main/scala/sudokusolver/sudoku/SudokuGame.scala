@@ -16,11 +16,10 @@ case class SudokuGame(grid: SudokuGrid) extends Logging {
     val coloringProblem = ColoringProblem(SudokuGraphColoringAdapter.SudokuGridToColoringState(grid))
     coloringProblem.trySolve()
 
-    coloringProblem.getSolution map { coloring =>
+    coloringProblem.solution map { coloring =>
       solutionGrid = Some(SudokuGraphColoringAdapter.ColoringResultToSudokuGrid(grid.size, coloring))
     }
   }
 
-  def isSolved = solutionGrid.isDefined
-  def getSolution = solutionGrid
+  def solution = solutionGrid
 }

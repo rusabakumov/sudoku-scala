@@ -69,9 +69,7 @@ object SudokuGraphColoringAdapter {
       row <- 0 until gridSize
       i   <- 0 until gridSize
       j   <- (i + 1) until gridSize
-    } yield {
-      SudokuVertex(row, i) -> SudokuVertex(row, j)
-    }
+    } yield SudokuVertex(row, i) -> SudokuVertex(row, j)
     rowConnections.toList
   }
 
@@ -80,9 +78,7 @@ object SudokuGraphColoringAdapter {
       column  <- 0 until gridSize
       i       <- 0 until gridSize
       j       <- (i + 1) until gridSize
-    } yield {
-      SudokuVertex(i, column) -> SudokuVertex(j, column)
-    }
+    } yield SudokuVertex(i, column) -> SudokuVertex(j, column)
     columnConnections.toList
   }
 
@@ -104,17 +100,13 @@ object SudokuGraphColoringAdapter {
       val regionVertexIndices = for {
         i <- 0 until regionSize
         j <- 0 until regionSize
-      } yield {
-        SudokuVertex(regionStartI + i, regionStartJ + j)
-      }
+      } yield SudokuVertex(regionStartI + i, regionStartJ + j)
 
       //And creating all connections between them
       for {
         i <- 0 until regionVertexIndices.size
         j <- i + 1 until regionVertexIndices.size
-      } yield {
-        regionVertexIndices(i) -> regionVertexIndices(j)
-      }
+      } yield regionVertexIndices(i) -> regionVertexIndices(j)
     }
     regionConnections.flatten.toList
   }

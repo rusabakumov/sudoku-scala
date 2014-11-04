@@ -16,7 +16,7 @@ object Solver extends Logging {
     val sudokuGame = SudokuGame(SudokuGrid.readGridFromFile(config.gridSize, config.inputFile))
     sudokuGame.trySolve()
 
-    sudokuGame.getSolution match {
+    sudokuGame.solution match {
       case Some(resultingGrid) =>
         logger.info("Sudoku solved!")
         SudokuGrid.writeGridToFile(resultingGrid, config.outputFile)
