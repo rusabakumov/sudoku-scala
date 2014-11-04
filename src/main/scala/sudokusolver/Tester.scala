@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
  */
 object Tester extends Logging {
 
-  def main(args: Array[String]) {
+  def runTester() {
     val testSetNames = AppConfig.config.getObject("test-sets").keySet()
 
     logger.info(s"Starting sudoku solver tester. Found ${testSetNames.size()} testsets")
@@ -56,10 +56,10 @@ object Tester extends Logging {
 
         sudokuGame.solution match {
           case Some(resultingGrid)  =>
-            logger.info(s"Grid #$index solved in $formattedSeconds seconds")
-
             val resultFile = new File(resultPath.getPath, gridFile.getName)
             SudokuGrid.writeGridToFile(resultingGrid, resultFile.getPath)
+
+            logger.info(s"Grid #$index solved in $formattedSeconds seconds. Solution written to ${resultFile.getPath} file")
 
           case None                 =>
             logger.info(s"Grid #$index cannot be solved!")

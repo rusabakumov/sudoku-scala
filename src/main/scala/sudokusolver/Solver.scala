@@ -8,11 +8,20 @@ object Solver extends Logging {
   private val defaultInFile = AppConfig.config.getString("default-input-file")
   private val defaultOutFile = AppConfig.config.getString("default-output-file")
 
-  case class Config(inputFile: String = defaultInFile,
+  case class Config(testMode: Boolean = false,
+                    inputFile: String = defaultInFile,
                     outputFile: String = defaultOutFile,
                     gridSize: Int = defaultGridSize)
 
   def main(args: Array[String]): Unit = argParser.parse(args, Config()) map { config =>
+    if (config.testMode) {
+      Tester.runTester()
+    } else {
+      solveOneGame(config)
+    }
+  }
+
+  private def solveOneGame(config: Config) {
     val sudokuGame = SudokuGame(SudokuGrid.readGridFromFile(config.gridSize, config.inputFile))
     sudokuGame.trySolve()
 
@@ -37,6 +46,8 @@ object Solver extends Logging {
     opt[Int]('n', "gridSize") valueName "<grid size>" action { (value, conf) =>
       conf.copy(gridSize = value)
     } text s"The size of game grid, $defaultGridSize by default"
+    opt[Unit]('t', "testMode") action { (_, c) =>
+      c.copy(testMode = true) } text "Enables test mode. Solver runs on a set of predefined testsets. They described in application.conf"
   }
 
 }
