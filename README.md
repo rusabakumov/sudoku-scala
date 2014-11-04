@@ -1,7 +1,7 @@
 sudoku-scala
 ============
 
-A simple solver for sudoku game. Solves sudoku as graph coloring problem (using backtracking).
+A simple solver for sudoku game. Solves sudoku as graph coloring problem (using backtracking). This implementation seems to be quite inefficient, there are many optimizations that can be helpful, but were omitted for the sake of code clarity and due to lack of time :)
 
 It has two run modes:
 - one grid solver, that gets a grid from .csv file and outputs the result to another

@@ -13,10 +13,23 @@ import sudokusolver.utils.Logging
  */
 case class ColoringState[V <: Vertex, VC <: VertexColor](vertices: List[VertexState[V, VC]]) extends Logging {
   /**
-   * Checks that current partial coloring is correct at this state:
-   * all uncolored vertices has at least one suitable color
+   * Checks that current partial coloring is consistent at this state: all uncolored vertices has at least one suitable color
+   * The reason to have this separate from isCorrect is the efficiency - it requires only one pass over vertices
    */
   def isConsistent: Boolean = {
+    vertices forall {
+      case VertexState(vertex, None, suitableColors, _) =>
+        logger.trace(s"Vertex $vertex is not colored and has no suitable colors!")
+        suitableColors.nonEmpty
+      case _  => true
+    }
+  }
+
+  /**
+   * Checks that current partial coloring is correct at this state: there is no painting conflicts
+   * (no connected vertices painted with same color)
+   */
+  def isCorrect: Boolean = {
     vertices forall {
       //If vertex is colored - no neighbors colored with the same color
       case VertexState(vertex, Some(color), _, neighbors) => neighbors forall {
@@ -24,13 +37,13 @@ case class ColoringState[V <: Vertex, VC <: VertexColor](vertices: List[VertexSt
           val colorsNotSame = neighborVertexState.color != Some(color)
 
           if (!colorsNotSame) {
-            logger.debug(s"Connected vertices $vertex and $neighborVertex have the same color $color!")
+            logger.trace(s"Connected vertices $vertex and $neighborVertex have the same color $color!")
           }
 
           colorsNotSame
         }
       }
-      case VertexState(_, None, suitableColors, _) => suitableColors.nonEmpty
+      case VertexState(vertex, None, suitableColors, _) => true
     }
   }
 

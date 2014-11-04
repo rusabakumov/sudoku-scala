@@ -3,7 +3,7 @@ package sudokusolver.utils
 import com.typesafe.config.ConfigFactory
 
 /**
- * Global object that holds initialized config object
+ * Global object that holds initialized config
  */
 object AppConfig {
 

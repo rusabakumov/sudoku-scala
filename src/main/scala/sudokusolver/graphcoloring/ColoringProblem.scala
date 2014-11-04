@@ -1,5 +1,7 @@
 package sudokusolver.graphcoloring
 
+import sudokusolver.utils.Logging
+
 /**
  * Represents one instance of graph coloring problem.
  * By given graph with initial partial coloring (not mandatory), tries to paint it's vertices witg available colors
@@ -8,7 +10,11 @@ package sudokusolver.graphcoloring
  * @tparam V  - type of vertex
  * @tparam VC - type of vertex color
  */
-case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: ColoringState[V, VC]) {
+case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: ColoringState[V, VC]) extends Logging {
+  if (!initialState.isConsistent) {
+    logger.error("Initial state passed to coloring problem is not consistent!")
+  }
+
   private var resultingState: Option[ColoringState[V, VC]] = None
 
   def trySolve() = {
@@ -46,6 +52,7 @@ case class ColoringProblem[V <: Vertex, VC <: VertexColor](initialState: Colorin
         for (
           color         <- vertexToPaint.suitableColors;
           updatedState  = state.paintVertex(vertexToPaint.vertex, color);
+          if updatedState.isConsistent;
           finalState    <- findColoring(updatedState)
         ) {
           //Returning first found final state
