@@ -15,9 +15,9 @@ case class SudokuGrid(size: Int, cells: Array[Array[Int]]) {
 }
 
 object SudokuGrid {
-  val defaultGridSize = AppConfig.config.getInt("default-grid-size")
-  val defaultInputFile = AppConfig.config.getString("default-input-file")
-  val defaultOutputFile = AppConfig.config.getString("default-output-file")
+  private val defaultGridSize = AppConfig.config.getInt("default-grid-size")
+  private val defaultInputFile = AppConfig.config.getString("default-input-file")
+  private val defaultOutputFile = AppConfig.config.getString("default-output-file")
 
   def readGridFromFile(gridSize: Int = defaultGridSize, fileName: String = defaultInputFile): SudokuGrid = {
     val fileReader = new FileReader(fileName)

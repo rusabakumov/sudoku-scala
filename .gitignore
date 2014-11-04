@@ -18,4 +18,6 @@ Thumbs.db
 .~lock*
 
 grid.csv
-out.txt
+solution.csv
+
+solutions/
